@@ -41,6 +41,7 @@ class Color(object):
     def __str__(self):
         return self.get_str()
 
+
 class Coeff(object):
     def __init__(self):
         self._c = random.randint(-150, 150) / 100
@@ -93,6 +94,28 @@ class Coeff(object):
         if (not condition1) or (not condition2) or (not condition3):
             return False
         return True
+
+
+class PixelInfo():
+    def __init__(self):
+        self.counter = 0
+        self.color = Color(0, 0, 0)
+
+    @property
+    def counter(self):
+        return self._counter
+
+    @counter.setter
+    def counter(self, value):
+        self._counter = value
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, value):
+        self._color = value
 
 
 
