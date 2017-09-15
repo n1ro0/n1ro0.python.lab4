@@ -1,13 +1,15 @@
 #Ilya Chaban
 import json
 import random
-from helpclasses import Color, Coeff, PixelInfo
+import math
+from helpclasses import Coeff, PixelInfo
 from predifinedfunctionsset import pfs
 from tkinter import Tk, Button, Canvas, PhotoImage
+import numpy as np
 
 
 def create_and_write_into_file(filename):
-    coeff = [Coeff() for i in range(10)]
+    coeff = np.array([Coeff() for i in range(10)])
     data = json.dumps([c.to_dict() for c in coeff])
     with open("coeffs.json", "w") as f:
         f.write(data)
@@ -22,7 +24,33 @@ def read_from_file(filename):
         co = Coeff()
         co.from_dict(dc)
         coeff.append(co)
+    coeff = np.array(coeff)
     return coeff
+
+
+def correction(res_x, res_y):
+    max = 0.0
+    gamma = 2.2
+    x = 0
+    while x < res_x:
+        y = 0
+        while y < res_y:
+            if pixels[x][y].counter != 0:
+                pixels[x][y].normal =  math.log10(pixels[x][y].counter)
+                if pixels[x][y].normal > max:
+                    max = pixels[x][y].normal
+            y += 1
+        x += 1
+    x = 0
+    while x < res_x:
+        y = 0
+        while y < res_y:
+            pixels[x][y].normal /= max
+            pixels[x][y].color.r = int(pixels[x][y].color.r * pixels[x][y].normal ** (1 / gamma))
+            pixels[x][y].color.g = int(pixels[x][y].color.g * pixels[x][y].normal ** (1 / gamma))
+            pixels[x][y].color.b = int(pixels[x][y].color.b * pixels[x][y].normal ** (1 / gamma))
+            y += 1
+        x += 1
 
 
 def render():
@@ -30,17 +58,17 @@ def render():
         coeff = read_from_file("coeffs.json")
     else:
         coeff = create_and_write_into_file("coeffs.json")
-    res_x = 700
-    res_y = 500
-    x_min = 0
-    x_max = 0.700
-    y_min = 0.
-    y_max = 0.500
+    res_x = 800
+    res_y = 600
+    x_min = -0.40
+    x_max = 0.4
+    y_min = -0.3
+    y_max = 0.3
     choices = [i for i in pfs.keys()]
     for p_count in range(10000):
-        new_x = random.randint(1, 700) / 1000
-        new_y = random.randint(1, 500)  / 1000
-        for step in range(-20, 100):
+        new_x = random.randint(-150, 150) / 1000
+        new_y = random.randint(-100, 100)  / 1000
+        for step in range(-20, 1000):
 
             choice = random.choice(choices)
             rand = random.randint(0, 9)
@@ -62,6 +90,7 @@ def render():
                         pixel_info.color.g = (pixel_info.color.g + coeff[rand].color.g) // 2
                         pixel_info.color.b = (pixel_info.color.b + coeff[rand].color.b) // 2
                     pixel_info.counter += 1
+    correction(res_x, res_y)
     x = 0
     while x < res_x:
         y = 0
@@ -71,11 +100,10 @@ def render():
             y += 1
         x += 1
 
-
-pixels = [[PixelInfo() for i in range(500)] for i in range(700)]
+pixels = np.array([np.array([PixelInfo() for i in range(600)]) for i in range(800)])
 root = Tk()
-canvas = Canvas(root, width=700, height=500, background="black")
-image = PhotoImage(width=700, height=500)
+canvas = Canvas(root, width=800, height=600, background="black")
+image = PhotoImage(width=800, height=600)
 canvas.create_image(0, 0, image=image, anchor="nw")
 canvas.pack()
 button = Button(root, text="Draw", command=render)

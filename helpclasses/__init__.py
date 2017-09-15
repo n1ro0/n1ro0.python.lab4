@@ -161,6 +161,7 @@ class PixelInfo():
     def __init__(self):
         self.counter = 0
         self.color = Color(0, 0, 0)
+        self.normal = 0.
 
     @property
     def counter(self):
@@ -177,6 +178,14 @@ class PixelInfo():
     @color.setter
     def color(self, value):
         self._color = value
+
+    @property
+    def normal(self):
+        return self._normal
+
+    @normal.setter
+    def normal(self, value):
+        self._normal = value
 
 
 
